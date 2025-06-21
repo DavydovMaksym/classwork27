@@ -1,0 +1,203 @@
+#include <iostream>
+
+template <typename T>
+class Array 
+{
+    T* data;
+    int size;
+    int count;
+    int grow;
+
+public:
+    Array(int initSize = 0, int growBy = 1) : size(initSize), count(0), grow(growBy)
+    {
+        data = size > 0 ? new T[size] : nullptr;
+    }
+
+    ~Array()
+    {
+        delete[] data;
+    }
+
+    int GetSize() const
+    {
+        return size;
+    }
+
+    void SetSize(int newSize, int growBy = 1)
+    {
+        grow = growBy;
+        if (newSize == size)
+        {
+            return;
+        }
+
+        T* newData = newSize > 0 ? new T[newSize] : nullptr;
+        int minCount = (newSize < count) ? newSize : count;
+
+        for (int i = 0; i < minCount; ++i)
+        {
+            newData[i] = data[i];
+        }
+
+        delete[] data;
+        data = newData;
+        size = newSize;
+        if (count > size)
+        {
+            count = size;
+        }
+    }
+
+    int GetUpperBound() const
+    {
+        return count - 1;
+    }
+
+    bool IsEmpty() const
+    {
+        return count == 0;
+    }
+
+    void FreeExtra() 
+    {
+        if (count < size)
+        {
+            T* newData = count > 0 ? new T[count] : nullptr;
+            for (int i = 0; i < count; ++i)
+            {
+                newData[i] = data[i];
+            }
+            delete[] data;
+            data = newData;
+            size = count;
+        }
+    }
+
+    void RemoveAll()
+    {
+        delete[] data;
+        data = nullptr;
+        size = 0;
+        count = 0;
+    }
+
+    T GetAt(int index) const
+    {
+        if (index < 0 || index >= count)
+        {
+            return T();
+        }
+        return data[index];
+    }
+
+    void SetAt(int index, const T& value)
+    {
+        if (index < 0 || index >= size)
+        {
+            return;
+        }
+        data[index] = value;
+        if (index >= count)
+        {
+            count = index + 1;
+        }
+    }
+
+    T& operator[](int index)
+    {
+        static T dummy = T();
+        if (index < 0 || index >= count)
+        {
+            return dummy;
+        }
+        return data[index];
+    }
+
+    const T& operator[](int index) const
+    {
+        static T dummy = T();
+        if (index < 0 || index >= count)
+        {
+            return dummy;
+        }
+        return data[index];
+    }
+
+    void Add(const T& value)
+    {
+        if (count >= size)
+        {
+            SetSize(size + grow, grow);
+        }
+        data[count++] = value;
+    }
+
+    void Append(const Array<T>& other) 
+    {
+        int total = count + other.count;
+        if (total > size)
+        {
+            SetSize(total, grow);
+        }
+
+        for (int i = 0; i < other.count; ++i)
+        {
+            data[count++] = other.data[i];
+        }
+    }
+
+    Array<T>& operator=(const Array<T>& other)
+    {
+        if (this != &other) 
+        {
+            delete[] data;
+            size = other.size;
+            count = other.count;
+            grow = other.grow;
+            data = new T[size];
+            for (int i = 0; i < count; ++i)
+            {
+                data[i] = other.data[i];
+            }
+        }
+        return *this;
+    }
+
+    T* GetData() const 
+    {
+        return data;
+    }
+
+    void InsertAt(int index, const T& value)
+    {
+        if (index < 0 || index > count)
+        {
+            return;
+        }
+        if (count >= size)
+        {
+            SetSize(size + grow, grow);
+        }
+
+        for (int i = count; i > index; --i)
+        {
+            data[i] = data[i - 1];
+        }
+
+        data[index] = value;
+        ++count;
+    }
+
+    void RemoveAt(int index, int num = 1) {
+        if (index < 0 || index + num > count)
+        {
+            return;
+        }
+        for (int i = index; i < count - num; ++i)
+        {
+            data[i] = data[i + num];
+        }
+        count -= num;
+    }
+};
